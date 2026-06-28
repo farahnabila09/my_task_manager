@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import 'add_task_page.dart';
 import 'edit_task_page.dart';
 import 'package:intl/intl.dart';
+import 'login_page.dart';
 
 class TaskPage extends StatelessWidget {
   const TaskPage({super.key});
@@ -37,25 +38,36 @@ class TaskPage extends StatelessWidget {
               Icons.logout,
               color: Colors.black,
             ),
-            onPressed: () async {
-              await auth.logout();
+onPressed: () async {
+            await auth.logout();
 
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
-            },
-          ),
+            if (context.mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const LoginPage(),
+                ),
+                (route) => false,
+              );
+            }
+          },
+                    ),
         ],
       ),
 
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('tasks')
-            .orderBy(
-              'createdAt',
-              descending: true,
-            )
-            .snapshots(),
+  stream: FirebaseFirestore.instance
+      .collection('tasks')
+      .where(
+        'userId',
+        isEqualTo:
+            FirebaseAuth
+                .instance
+                .currentUser!
+                .uid,
+      )
+      .snapshots(),
 
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
